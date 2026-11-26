@@ -1,46 +1,92 @@
-class Kendaraan {
+class PengirimNotifikasi {
+    kirim(tujuan, pesan) {
+        throw new Error("Method kirim() wajib diimplementasikan!");
+    }
+}
+
+class EmailNotifier extends PengirimNotifikasi {
     constructor(nama) {
+        super();
         this.nama = nama;
     }
 
-    info() {
-        console.log(`Kendaraan: ${this.nama}`);
+    kirim(tujuan, pesan) {
+        console.log(`[EMAIL] ${this.nama} -> ${tujuan}: ${pesan}`);
     }
 }
 
-class KendaraanBensin extends Kendaraan {
-    isiBensin(liter) {
-        console.log(`${this.nama} mengisi bensin ${liter} liter.`);
+class WhatsAppNotifier extends PengirimNotifikasi {
+    constructor(nama) {
+        super();
+        this.nama = nama;
+    }
+
+    kirim(tujuan, pesan) {
+        console.log(`[WA] ${this.nama} -> ${tujuan}: ${pesan}`);
     }
 }
 
-class KendaraanListrik extends Kendaraan {
-    isiDaya(kwh) {
-        console.log(`${this.nama} mengisi daya ${kwh} kWh.`);
+class PagerRusak extends PengirimNotifikasi {
+    constructor(nama) {
+        super();
+        this.nama = nama;
     }
 }
 
-class MobilBensin extends KendaraanBensin {}
+class LayananPesanan {
+    constructor(pengirim) {
+        LayananPesanan.validasi(pengirim);
+        this.pengirim = pengirim;
+    }
 
-class MotorBensin extends KendaraanBensin {}
+    static validasi(pengirim) {
+        if (!(pengirim instanceof PengirimNotifikasi)) {
+            throw new Error("Pengirim harus turunan PengirimNotifikasi!");
+        }
+    }
 
-class MobilListrik extends KendaraanListrik {}
+    gantiPengirim(pengirimBaru) {
+        LayananPesanan.validasi(pengirimBaru);
+        this.pengirim = pengirimBaru;
+        console.log(`[INFO] Pengirim diganti ke ${pengirimBaru.nama}.`);
+    }
 
-function isiSemuaBensin(daftar) {
-    daftar.forEach((x) => x.isiBensin(20));
+    buatPesanan(kodePesanan, tujuan) {
+        console.log(`[PESANAN] ${kodePesanan} berhasil dibuat.`);
+        this.pengirim.kirim(tujuan, `Pesanan ${kodePesanan} sedang diproses.`);
+    }
 }
 
-function isiSemuaDaya(daftar) {
-    daftar.forEach((x) => x.isiDaya(40));
+console.log("=== ORDER NOTIFICATION SERVICE ===");
+
+let layanan;
+
+try {
+    const email = new EmailNotifier("Email_3157");
+    layanan = new LayananPesanan(email);
+    layanan.buatPesanan("PSN-01", "budi@mail.com");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
 }
 
-const avanza = new MobilBensin("Avanza_XXXX");
-const ioniq = new MobilListrik("Ioniq_XXXX");
-const beat = new MotorBensin("Beat_XXXX");
+try {
+    const wa = new WhatsAppNotifier("WhatsApp_3157");
+    layanan.gantiPengirim(wa);
+    layanan.buatPesanan("PSN-02", "081234567890");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
 
-avanza.info();
-ioniq.info();
-beat.info();
+try {
+    const pager = new PagerRusak("Pager_3157");
+    layanan.gantiPengirim(pager);
+    layanan.buatPesanan("PSN-03", "pager-01");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
 
-isiSemuaBensin([avanza, beat]);
-isiSemuaDaya([ioniq]);
+try {
+    const layananIlegal = new LayananPesanan({ kirim() {} });
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}

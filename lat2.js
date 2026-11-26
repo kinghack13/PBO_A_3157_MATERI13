@@ -1,18 +1,18 @@
-const pembersih = {
-    bersihkan() {
-        console.log(`${this.nama} membersihkan ruangan.`);
+const printer = {
+    cetak(data) {
+        console.log(`${this.nama} mencetak ${data}.`);
     }
 };
 
-const pengantar = {
-    antarPaket() {
-        console.log(`${this.nama} mengantar paket.`);
+const scanner = {
+    pindai(data) {
+        console.log(`${this.nama} memindai ${data}.`);
     }
 };
 
-const penjaga = {
-    patroli() {
-        console.log(`${this.nama} berpatroli di area.`);
+const fax = {
+    kirimFax(data) {
+        console.log(`${this.nama} mengirim fax ${data}.`);
     }
 };
 
@@ -20,27 +20,58 @@ function applyCapabilities(Kelas, ...kemampuan) {
     Object.assign(Kelas.prototype, ...kemampuan);
 }
 
-class RobotRumah {
+class MesinMultifungsi {
     constructor(nama) {
         this.nama = nama;
     }
 }
 
-class RobotKurir {
+class PrinterSederhana {
     constructor(nama) {
         this.nama = nama;
     }
 }
+applyCapabilities(MesinMultifungsi, printer, scanner, fax);
+applyCapabilities(PrinterSederhana, printer);
 
-applyCapabilities(RobotRumah, pembersih, penjaga);
-applyCapabilities(RobotKurir, pengantar);
+function jalankanTugas(perangkat, tugas, data) {
+    if (typeof perangkat[tugas] !== "function") {
+        throw new Error(`${perangkat.nama} tidak mendukung ${tugas}()`);
+    }
+    perangkat[tugas](data);
+}
 
-const robotRumah = new RobotRumah("RobotRumah_XXXX");
-const robotKurir = new RobotKurir("RobotKurir_XXXX");
+console.log("=== OFFICE DEVICE TASK ROUTER ===");
 
-robotRumah.bersihkan();
-robotRumah.patroli();
-robotKurir.antarPaket();
+const mesin = new MesinMultifungsi("Mesin_3157");
+const printerBiasa = new PrinterSederhana("Printer_3157");
 
-console.log(`${robotKurir.nama} bisa membersihkan? ${typeof robotKurir.bersihkan === "function"}`);
-console.log(`${robotRumah.nama} bisa mengantar paket? ${typeof robotRumah.antarPaket === "function"}`);
+try {
+    jalankanTugas(mesin, "cetak", "Laporan.pdf");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
+
+try {
+    jalankanTugas(mesin, "pindai", "KTP.jpg");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
+
+try {
+    jalankanTugas(printerBiasa, "cetak", "Laporan.pdf");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
+
+try {
+    jalankanTugas(printerBiasa, "pindai", "KTP.jpg");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
+
+try {
+    jalankanTugas(printerBiasa, "kirimFax", "Surat.docx");
+} catch (error) {
+    console.log("[GAGAL] " + error.message);
+}
